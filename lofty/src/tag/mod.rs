@@ -198,11 +198,20 @@ impl Accessor for Tag {
 	}
 
 	fn set_year(&mut self, value: u32) {
-		if let Some(item) = self.get_string(ItemKey::RecordingDate) {
-			if item.len() >= 4 {
-				let (_, remaining) = item.split_at(4);
-				self.insert_text(ItemKey::RecordingDate, format!("{value}{remaining}"));
-				return;
+		// Check if RecordingDate exists and is at least 4 chars
+		if let Some(recording_date) = self.get_string(ItemKey::RecordingDate) {
+			if recording_date.len() >= 4 {
+				// Check if Year is empty or missing before updating RecordingDate
+				let year_empty = match self.get_string(ItemKey::Year) {
+					Some(year_val) => year_val.is_empty(),
+					None => true,
+				};
+
+				if year_empty {
+					let (_, remaining) = recording_date.split_at(4);
+					self.insert_text(ItemKey::RecordingDate, format!("{value}{remaining}"));
+					return;
+				}
 			}
 		}
 
